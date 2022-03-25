@@ -12,6 +12,16 @@ use Illuminate\Http\Request;
 class CafeteriaController extends Controller
 {
 
+    public function index(): JsonResponse
+    {
+        return new JsonResponse(Cafeteria::find(1)->with('accounts')->first());
+    }
+
+    /**
+     * @param   CafeteriaRequest  $req
+     *
+     * @return JsonResponse
+     */
     public function store(CafeteriaRequest $req): JsonResponse
     {
         if ( ! $cafeteria = Cafeteria::find(1)) {
@@ -19,6 +29,8 @@ class CafeteriaController extends Controller
                 'start_month' => $req->start_month,
                 'user_id'     => 1,
             ]);
+        } else {
+            Cafeteria::where('id', 1)->update(['start_month' => $req->start_month]);
         }
 
         $sync = [];
