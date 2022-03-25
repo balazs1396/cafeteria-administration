@@ -6,3 +6,4 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::post('cafeteria', [CafeteriaController::class, 'store']);
+Route::get('cafeteria', [CafeteriaController::class, 'index']);
