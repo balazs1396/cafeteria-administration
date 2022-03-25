@@ -130,6 +130,7 @@
 <script>
 import {validationMixin} from 'vuelidate'
 import CafeteriaRepository from '@/repositories/CafeteriaRepository'
+import {getMonths, getAccounts} from '@/helpers/helper'
 
 export default {
   mixins: [validationMixin],
@@ -138,39 +139,8 @@ export default {
     return {
       errors: {},
       annualBudget: 400000,
-      months: [
-        'Január',
-        'Február',
-        'Március',
-        'Április',
-        'Május',
-        'Június',
-        'Július',
-        'Augusztus',
-        'Szeptember',
-        'Október',
-        'November',
-        'December'
-      ],
       calculateFromMonth: '',
       selectedAccounts: [],
-      accounts: [
-        {
-          name: 'accommodation',
-          value: 'Szálláshely',
-          annualValue: "0"
-        },
-        {
-          name: 'hospitality',
-          value: 'Vendéglátás',
-          annualValue: "0"
-        },
-        {
-          name: 'leisure',
-          value: 'Szabadidő',
-          annualValue: "0"
-        },
-      ],
       annualDistribution: [],
       defaultTableHeader: [{
         text: 'Zseb',
@@ -289,6 +259,12 @@ export default {
     savingIsPossible() {
       return Math.round(this.remainingAnnualAmount) === 0 && this.$refs.form.validate()
     },
+    months() {
+      return getMonths()
+    },
+    accounts() {
+      return getAccounts()
+    }
   },
   mounted: function () {
     this.calculateFromMonth = this.months[0]
