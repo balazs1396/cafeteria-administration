@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import {getMonths, getAccounts} from '@/helpers/helper'
+import {getMonths, getVisibleName} from '@/helpers/helper'
 
 export default {
   name: 'DataTable',
@@ -41,9 +41,7 @@ export default {
   },
   methods: {
     getVisibleName(name) {
-      return getAccounts().filter(account => {
-        return account.name === name
-      })[0].value
+      return getVisibleName(name)
     }
   },
   computed: {

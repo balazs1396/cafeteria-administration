@@ -130,7 +130,7 @@
 <script>
 import {validationMixin} from 'vuelidate'
 import CafeteriaRepository from '@/repositories/CafeteriaRepository'
-import {getMonths, getAccounts} from '@/helpers/helper'
+import {getMonths, getVisibleName} from '@/helpers/helper'
 
 export default {
   mixins: [validationMixin],
@@ -141,6 +141,24 @@ export default {
       annualBudget: 400000,
       calculateFromMonth: '',
       selectedAccounts: [],
+      accounts: [
+        {
+          name: 'accommodation',
+          value: 'Szálláshely',
+          annualValue: "0"
+        },
+        {
+          name: 'hospitality',
+          value: 'Vendéglátás',
+          annualValue: "0"
+        },
+        {
+          name: 'leisure',
+          value: 'Szabadidő',
+          annualValue: "0"
+        }
+      ],
+      months: [],
       annualDistribution: [],
       defaultTableHeader: [{
         text: 'Zseb',
@@ -210,7 +228,7 @@ export default {
     save() {
       const self = this
       self.$store.commit('SET_IS_LOADING', true);
-      const accounts = this.accounts.filter(account => Number(account.annualValue) > 0)
+      const accounts = this.selectedAccounts.filter(account => Number(account.annualValue) > 0)
 
       CafeteriaRepository.saveCafeteria({
         startMonth: this.months.indexOf(this.calculateFromMonth) + 1,
@@ -249,7 +267,7 @@ export default {
       return this.annualBudget / 12 * (12 - this.months.indexOf(this.calculateFromMonth))
     },
     amountAlreadyUsedInActualYear() {
-      return this.accounts.reduce((sum, account) => {
+      return this.selectedAccounts.reduce((sum, account) => {
         return sum += Number(account.annualValue)
       }, 0)
     },
@@ -259,15 +277,25 @@ export default {
     savingIsPossible() {
       return Math.round(this.remainingAnnualAmount) === 0 && this.$refs.form.validate()
     },
-    months() {
-      return getMonths()
-    },
-    accounts() {
-      return getAccounts()
-    }
   },
   mounted: function () {
-    this.calculateFromMonth = this.months[0]
+    this.months = getMonths()
+
+    const self = this
+    self.$store.commit('SET_IS_LOADING', true)
+    CafeteriaRepository.getCafeteria()
+      .then(response => {
+          self.calculateFromMonth = self.months[response.data.start_month - 1]
+          response.data.accounts.forEach(account => {
+            const index = self.accounts.findIndex(tmpAccount => tmpAccount.name === account.name)
+            self.accounts[index].annualValue = String(account.pivot.annual_value)
+            self.selectedAccounts.push(self.accounts[index])
+          })
+        }
+      )
+      .finally(() => {
+        self.$store.commit('SET_IS_LOADING', false)
+      })
   }
 }
 </script>

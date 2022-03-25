@@ -38,3 +38,9 @@ export function getMonths() {
 export function getAccounts() {
   return accounts
 }
+
+export function getVisibleName(name) {
+  return getAccounts().filter(account => {
+    return account.name === name
+  })[0].value
+}
