@@ -139,7 +139,7 @@
 <script>
 import {validationMixin} from 'vuelidate'
 import CafeteriaRepository from '@/repositories/CafeteriaRepository'
-import {getMonths, getVisibleName} from '@/helpers/helper'
+import {getMonths} from '@/helpers/helper'
 
 export default {
   mixins: [validationMixin],
