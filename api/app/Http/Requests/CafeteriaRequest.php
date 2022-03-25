@@ -27,7 +27,7 @@ class CafeteriaRequest extends FormRequest
             'start_month' => 'required|integer|between:1,12',
             'accounts' => 'required|array',
             'accounts.*.name' => 'required|string|exists:accounts,name',
-            'accounts.*.annual_value' => 'required|integer|min:0|max:200000'
+            'accounts.*.annualValue' => 'required||regex:/^\d+(\.\d{1,2})?$/|min:0|max:200000'
         ];
     }
 

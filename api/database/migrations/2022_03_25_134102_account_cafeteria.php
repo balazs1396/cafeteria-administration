@@ -21,7 +21,7 @@ class AccountCafeteria extends Migration
             $table->unsignedBigInteger('account_id');
             $table->foreign('account_id')->references('id')->on('accounts');
 
-            $table->integer('annual_value');
+            $table->float('annual_value');
         });
     }
 
