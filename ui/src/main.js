@@ -6,6 +6,10 @@ import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import store from './vuex/store'
 
+import JsonCSV from 'vue-json-csv'
+
+Vue.component('downloadCsv', JsonCSV)
+
 Vue.use(Vuetify)
 Vue.config.productionTip = false
 

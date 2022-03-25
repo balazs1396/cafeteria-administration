@@ -113,6 +113,15 @@
       ></v-data-table>
 
       <v-row class="mt-5">
+        <v-col class="left">
+          <download-csv
+            :data="annualDistribution">
+            <v-btn color="primary">
+              CSV letöltése
+            </v-btn>
+
+          </download-csv>
+        </v-col>
         <v-col class="text-right">
           <v-btn
             color="primary"
