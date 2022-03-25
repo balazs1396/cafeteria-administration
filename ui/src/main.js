@@ -4,6 +4,7 @@ import router from './router'
 import currency from './filters/currency'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
+import store from './vuex/store'
 
 Vue.use(Vuetify)
 Vue.config.productionTip = false
@@ -13,5 +14,6 @@ new Vue({
   router,
   render: h => h(AppContainer),
   vuetify: new Vuetify(),
-  currency
+  currency,
+  store
 })
