@@ -23,7 +23,7 @@ class CafeteriaController extends Controller
 
         $sync = [];
         collect($req->accounts)->map(function ($account) use (&$sync) {
-            $sync[Account::where('name', $account['name'])->firstOrFail()->id] = ['annual_value' => $account['annual_value']];
+            $sync[Account::where('name', $account['name'])->firstOrFail()->id] = ['annual_value' => $account['annualValue']];
         });
 
         $cafeteria->accounts()->sync($sync);
