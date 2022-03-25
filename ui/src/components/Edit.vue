@@ -129,13 +129,14 @@
 
 <script>
 import {validationMixin} from 'vuelidate'
-import {required, maxLength, email} from 'vuelidate/lib/validators'
+import CafeteriaRepository from '@/repositories/CafeteriaRepository'
 
 export default {
   mixins: [validationMixin],
   name: 'Edit',
   data() {
     return {
+      errors: {},
       annualBudget: 400000,
       months: [
         'Január',
@@ -237,7 +238,29 @@ export default {
       })
     },
     save() {
-      alert('saved')
+      const self = this
+      self.$store.commit('SET_IS_LOADING', true);
+      const accounts = this.accounts.filter(account => Number(account.annualValue) > 0)
+
+      CafeteriaRepository.saveCafeteria({
+        startMonth: this.months.indexOf(this.calculateFromMonth) + 1,
+        accounts: accounts
+      })
+        .then(() => {
+          self.errors = {}
+          this.$router.push({name: 'home'})
+        })
+        .catch(error => {
+          if (error.response.status === 422) {
+            self.errors = error.response.data.errors
+          } else {
+            alert('some error occurred, sorry');
+          }
+          console.log(error)
+        })
+        .finally(() => {
+          self.$store.commit('SET_IS_LOADING', false);
+        })
     }
   },
   watch: {

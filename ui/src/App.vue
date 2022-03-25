@@ -41,10 +41,13 @@
         </v-container>
       </v-main>
     </v-app>
+    <loading/>
   </div>
 </template>
 
 <script>
+import Loading from "./components/Loading";
+
 export default {
   name: 'App',
   data: () => ({
@@ -53,5 +56,8 @@ export default {
       'Edit',
     ],
   }),
+  components: {
+    Loading
+  }
 }
 </script>
