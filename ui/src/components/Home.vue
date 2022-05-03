@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <div
-      v-if="startMonth.length === 0 || accounts.length === 0">
+      v-if="cafeteriaSum === 0">
       <v-card
         class="d-flex align-center justify-center pa-4 mx-auto"
         outlined
@@ -52,12 +52,12 @@ export default {
     self.$store.commit('SET_IS_LOADING', true)
     CafeteriaRepository.getCafeteria()
       .then(response => {
-          self.startMonth = response.data.start_month - 1
-          response.data.accounts.forEach(account => {
+          self.startMonth = response.data[0].start_month - 1
+          response.data.forEach(account => {
             self.accounts.push({
               name: account.name,
-              value: 'TESZT',
-              annualValue: account.pivot.annual_value
+              value: null,
+              annualValue: account.annual_value
             })
           })
         }
@@ -65,6 +65,13 @@ export default {
     .finally(() => {
       self.$store.commit('SET_IS_LOADING', false)
     })
+  },
+  computed: {
+    cafeteriaSum() {
+      return this.accounts.reduce((sum, account) => {
+        return sum += Number(account.annualValue)
+      }, 0)
+    }
   }
 }
 </script>

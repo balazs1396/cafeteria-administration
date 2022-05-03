@@ -142,14 +142,29 @@ export default {
         v => (v && v >= 0) || "Nem adhat meg negatív értéket",
         v => (v && v <= 200000) || "Nem lehet több mint 200 000",
       ],
-      accounts: []
+      accounts: [
+        {
+          name: 'accommodation',
+          value: 'Szálláshely',
+          annualValue: "0"
+        },
+        {
+          name: 'hospitality',
+          value: 'Vendéglátás',
+          annualValue: "0"
+        },
+        {
+          name: 'leisure',
+          value: 'Szabadidő',
+          annualValue: "0"
+        }
+      ]
     }
   },
   methods: {
     save() {
       const self = this
       self.$store.commit('SET_IS_LOADING', true);
-      // const accounts = this.accounts.filter(account => Number(account.annualValue) > 0)
 
       CafeteriaRepository.saveCafeteria({
         startMonth: this.months.indexOf(this.calculateFromMonth) + 1,
@@ -165,7 +180,6 @@ export default {
           } else {
             alert('some error occurred, sorry');
           }
-          console.log(error)
         })
         .finally(() => {
           self.$store.commit('SET_IS_LOADING', false);
@@ -230,32 +244,14 @@ export default {
     }
   },
   mounted: function () {
-//TODO seed it from backend
-    this.accounts = [
-      {
-        name: 'accommodation',
-        value: 'Szálláshely',
-        annualValue: "0"
-      },
-      {
-        name: 'hospitality',
-        value: 'Vendéglátás',
-        annualValue: "0"
-      },
-      {
-        name: 'leisure',
-        value: 'Szabadidő',
-        annualValue: "0"
-      }
-    ]
     const self = this
     self.$store.commit('SET_IS_LOADING', true)
     CafeteriaRepository.getCafeteria()
       .then(response => {
-          self.calculateFromMonth = self.months[response.data.start_month - 1]
-          response.data.accounts.forEach(account => {
+          self.calculateFromMonth = self.months[response.data[0].start_month - 1]
+          response.data.forEach(account => {
             const index = self.accounts.findIndex(tmpAccount => tmpAccount.name === account.name)
-            self.accounts[index].annualValue = String(account.pivot.annual_value)
+            self.accounts[index].annualValue = String(account.annual_value)
           })
         }
       )
