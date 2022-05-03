@@ -218,7 +218,6 @@ export default {
       return headers
     },
     annualDistribution() {
-      this.accounts
       const distributions = []
       const monthsNumber = 12 - this.months.indexOf(this.calculateFromMonth)
 
