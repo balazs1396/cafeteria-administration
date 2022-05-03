@@ -47,25 +47,12 @@
         outlined
       ></v-select>
 
-      <v-select
-        v-model="selectedAccounts"
-        :items="accounts"
-        item-text="value"
-        item-value="name"
-        label="Cafeteria zsebek"
-        hint="Kérjük válassza ki milyen alzsebekbe kívánja eloszta az éves keretösszegét"
-        return-object
-        multiple
-        chips
-        outlined
-        persistent-hint
-      ></v-select>
       <v-row class="mt-1">
 
         <v-col
           cols="4"
           sm="4"
-          v-show="selectedAccounts[selectedAccounts.findIndex(account => { return account.name === 'accommodation'})]">
+        >
           <v-text-field
             v-model="accounts[accounts.findIndex(account => {return account.name === 'accommodation'})].annualValue"
             :rules="annualAccountRules"
@@ -78,7 +65,7 @@
         <v-col
           cols="4"
           sm="4"
-          v-show="selectedAccounts[selectedAccounts.findIndex(account => { return account.name === 'hospitality'})]">
+        >
           <v-text-field
             v-model="accounts[accounts.findIndex(account => {return account.name === 'hospitality'})].annualValue"
             :rules="annualAccountRules"
@@ -91,7 +78,7 @@
         <v-col
           cols="4"
           sm="4"
-          v-show="selectedAccounts[selectedAccounts.findIndex(account => { return account.name === 'leisure'})]">
+        >
           <v-text-field
             v-model="accounts[accounts.findIndex(account => {return account.name === 'leisure'})].annualValue"
             :rules="annualAccountRules"
@@ -148,100 +135,25 @@ export default {
     return {
       errors: {},
       annualBudget: 400000,
-      calculateFromMonth: '',
-      selectedAccounts: [],
-      accounts: [
-        {
-          name: 'accommodation',
-          value: 'Szálláshely',
-          annualValue: "0"
-        },
-        {
-          name: 'hospitality',
-          value: 'Vendéglátás',
-          annualValue: "0"
-        },
-        {
-          name: 'leisure',
-          value: 'Szabadidő',
-          annualValue: "0"
-        }
-      ],
-      months: [],
-      annualDistribution: [],
-      defaultTableHeader: [{
-        text: 'Zseb',
-        value: 'account',
-        align: 'start'
-      }],
-      headers: [],
+      calculateFromMonth: null,
       valid: true,
       annualAccountRules: [
         v => !!v || "A mező kitöltése kötelező",
         v => (v && v >= 0) || "Nem adhat meg negatív értéket",
         v => (v && v <= 200000) || "Nem lehet több mint 200 000",
-      ]
+      ],
+      accounts: []
     }
   },
   methods: {
-    recalculateDistribution() {
-      this.annualDistribution = []
-      this.headers = [...this.defaultTableHeader]
-
-      if (!this.$refs.form.validate()) {
-        return
-      }
-
-      this.selectedAccounts.forEach((account) => {
-        const distribution = {
-          name: account.name,
-          account: account.value,
-        }
-
-        const indexOfFromMonth = this.months.indexOf(this.calculateFromMonth)
-        this.months.forEach((month, index) => {
-          if (index < indexOfFromMonth) return
-
-          //calculate headers
-          if (this.headers.filter(e => e.text === month).length === 0) {
-            this.headers.push({
-              text: month,
-              value: month
-            })
-          }
-
-          // calculate distributions
-          distribution[month] = 0
-
-        })
-        this.annualDistribution.push(distribution)
-      })
-      this.calculateMonthlyDistribution()
-    },
-    calculateMonthlyDistribution() {
-      this.annualDistribution.forEach((distributionRow, distributedIndex) => {
-        const distributedAnnualValue = this.selectedAccounts[this.selectedAccounts.findIndex(account => {
-          return account.name === distributionRow.name
-        })].annualValue
-
-        const monthsNumber = 12 - this.months.indexOf(this.calculateFromMonth)
-
-        for (const [key, value] of Object.entries(distributionRow)) {
-          if (this.months.includes(key)) {
-            this.annualDistribution[distributedIndex][key] = parseFloat(parseFloat(distributedAnnualValue / monthsNumber).toFixed(2))
-          }
-        }
-
-      })
-    },
     save() {
       const self = this
       self.$store.commit('SET_IS_LOADING', true);
-      const accounts = this.selectedAccounts.filter(account => Number(account.annualValue) > 0)
+      // const accounts = this.accounts.filter(account => Number(account.annualValue) > 0)
 
       CafeteriaRepository.saveCafeteria({
         startMonth: this.months.indexOf(this.calculateFromMonth) + 1,
-        accounts: accounts
+        accounts: this.accounts
       })
         .then(() => {
           self.errors = {}
@@ -260,23 +172,12 @@ export default {
         })
     }
   },
-  watch: {
-    selectedAccounts: {
-      handler: function () {
-        this.recalculateDistribution()
-      },
-      deep: true
-    },
-    calculateFromMonth() {
-      this.recalculateDistribution()
-    },
-  },
   computed: {
     amountCanBeUsedActualYear() {
       return this.annualBudget / 12 * (12 - this.months.indexOf(this.calculateFromMonth))
     },
     amountAlreadyUsedInActualYear() {
-      return this.selectedAccounts.reduce((sum, account) => {
+      return this.accounts.reduce((sum, account) => {
         return sum += Number(account.annualValue)
       }, 0)
     },
@@ -286,10 +187,67 @@ export default {
     savingIsPossible() {
       return Math.round(this.remainingAnnualAmount) === 0 && this.$refs.form.validate()
     },
+    headers() {
+      const headers = [{
+        text: 'Zseb',
+        value: 'account',
+        align: 'start'
+      }];
+      const indexOfFromMonth = this.months.indexOf(this.calculateFromMonth)
+      this.months.slice(indexOfFromMonth).forEach(month => {
+        headers.push({
+          text: month,
+          value: month
+        })
+      })
+
+      return headers
+    },
+    annualDistribution() {
+      this.accounts
+      const distributions = []
+      const monthsNumber = 12 - this.months.indexOf(this.calculateFromMonth)
+
+      this.accounts.forEach((account) => {
+        const costs = {}
+        this.headers.forEach(month => {
+          costs[month.value] = parseFloat(parseFloat(account.annualValue / monthsNumber).toFixed(2))
+        })
+
+        distributions.push({
+          ...costs,
+          ...{
+            account: account.value,
+          },
+        })
+
+      })
+
+      return distributions
+    },
+    months() {
+      return getMonths()
+    }
   },
   mounted: function () {
-    this.months = getMonths()
-
+//TODO seed it from backend
+    this.accounts = [
+      {
+        name: 'accommodation',
+        value: 'Szálláshely',
+        annualValue: "0"
+      },
+      {
+        name: 'hospitality',
+        value: 'Vendéglátás',
+        annualValue: "0"
+      },
+      {
+        name: 'leisure',
+        value: 'Szabadidő',
+        annualValue: "0"
+      }
+    ]
     const self = this
     self.$store.commit('SET_IS_LOADING', true)
     CafeteriaRepository.getCafeteria()
@@ -298,7 +256,6 @@ export default {
           response.data.accounts.forEach(account => {
             const index = self.accounts.findIndex(tmpAccount => tmpAccount.name === account.name)
             self.accounts[index].annualValue = String(account.pivot.annual_value)
-            self.selectedAccounts.push(self.accounts[index])
           })
         }
       )

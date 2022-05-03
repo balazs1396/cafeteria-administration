@@ -13,10 +13,10 @@
         >
           <v-tab
             v-for="link in links"
-            :key="link"
-            :to="link.toLowerCase()"
+            :key="link.path"
+            :to="link.path"
           >
-            {{ link }}
+            {{ link.value }}
           </v-tab>
         </v-tabs>
       </v-app-bar>
@@ -52,8 +52,8 @@ export default {
   name: 'App',
   data: () => ({
     links: [
-      'Home',
-      'Edit',
+      {path: 'home', value: 'Kezdőlap'},
+      {path: 'edit', value: 'Módosítás'},
     ],
   }),
   components: {
