@@ -3,18 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\Account;
-use Illuminate\Database\Eloquent\Model;
+use App\Enums\AccountEnum;
 use Illuminate\Database\Seeder;
 
 class AccountSeeder extends Seeder
 {
-
-    /** @var string[] */
-    private static $details = [
-        'accommodation',
-        'hospitality',
-        'leisure',
-    ];
 
     /**
      * Run the database seeds.
@@ -23,10 +16,15 @@ class AccountSeeder extends Seeder
      */
     public function run()
     {
-        foreach (self::$details as $accountName) {
+        foreach (AccountEnum::getValues() as $accountName) {
             Account::updateOrCreate([
                 'name' => $accountName,
-            ]);
+            ],
+                [
+                    'annual_value' => 0,
+                    'start_month'  => 1,
+                ]
+            );
         }
     }
 
