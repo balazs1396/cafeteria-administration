@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CafeteriaRequest;
-use App\Models\Cafeteria;
 use App\Models\Account;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -14,7 +12,7 @@ class CafeteriaController extends Controller
 
     public function index(): JsonResponse
     {
-        return new JsonResponse(Cafeteria::find(1)->with('accounts')->first());
+        return new JsonResponse(Account::all());
     }
 
     /**
