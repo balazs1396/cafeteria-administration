@@ -113,7 +113,7 @@ export default {
       calculateFromMonth: null,
       valid: true,
       annualAccountRules: [
-        v => !!v || "A mező kitöltése kötelező",
+        v => (!!v || v === 0) || "A mező kitöltése kötelező",
         v => (v && v >= 0) || "Nem adhat meg negatív értéket",
         v => (v && v <= 200000) || "Nem lehet több mint 200 000",
       ],
