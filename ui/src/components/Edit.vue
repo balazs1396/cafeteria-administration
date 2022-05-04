@@ -50,44 +50,19 @@
       <v-row class="mt-1">
 
         <v-col
+          v-for="account in accounts"
+          :key="account.name"
           cols="4"
           sm="4"
         >
           <v-text-field
-            v-model="accounts[accounts.findIndex(account => {return account.name === 'accommodation'})].annualValue"
+            v-model="account.annual_value"
             :rules="annualAccountRules"
-            label="Szálláshely éves keret"
+            :label="getVisibleName(account.name) + ` éves keret`"
             type="number"
             outlined
           ></v-text-field>
         </v-col>
-
-        <v-col
-          cols="4"
-          sm="4"
-        >
-          <v-text-field
-            v-model="accounts[accounts.findIndex(account => {return account.name === 'hospitality'})].annualValue"
-            :rules="annualAccountRules"
-            label="Vendéglátás éves keret"
-            type="number"
-            outlined
-          ></v-text-field>
-        </v-col>
-
-        <v-col
-          cols="4"
-          sm="4"
-        >
-          <v-text-field
-            v-model="accounts[accounts.findIndex(account => {return account.name === 'leisure'})].annualValue"
-            :rules="annualAccountRules"
-            label="Szabadidő éves keret"
-            type="number"
-            outlined
-          ></v-text-field>
-        </v-col>
-
       </v-row>
 
       <v-data-table
@@ -126,7 +101,7 @@
 <script>
 import {validationMixin} from 'vuelidate'
 import CafeteriaRepository from '@/repositories/CafeteriaRepository'
-import {getMonths} from '@/helpers/helper'
+import {getMonths, getVisibleName} from '@/helpers/helper'
 
 export default {
   mixins: [validationMixin],
@@ -142,23 +117,7 @@ export default {
         v => (v && v >= 0) || "Nem adhat meg negatív értéket",
         v => (v && v <= 200000) || "Nem lehet több mint 200 000",
       ],
-      accounts: [
-        {
-          name: 'accommodation',
-          value: 'Szálláshely',
-          annualValue: "0"
-        },
-        {
-          name: 'hospitality',
-          value: 'Vendéglátás',
-          annualValue: "0"
-        },
-        {
-          name: 'leisure',
-          value: 'Szabadidő',
-          annualValue: "0"
-        }
-      ]
+      accounts: []
     }
   },
   methods: {
@@ -184,6 +143,9 @@ export default {
         .finally(() => {
           self.$store.commit('SET_IS_LOADING', false);
         })
+    },
+    getVisibleName(name) {
+      return getVisibleName(name)
     }
   },
   computed: {
@@ -192,7 +154,7 @@ export default {
     },
     amountAlreadyUsedInActualYear() {
       return this.accounts.reduce((sum, account) => {
-        return sum += Number(account.annualValue)
+        return sum += Number(account.annual_value)
       }, 0)
     },
     remainingAnnualAmount() {
@@ -224,7 +186,7 @@ export default {
       this.accounts.forEach((account) => {
         const costs = {}
         this.headers.forEach(month => {
-          costs[month.value] = parseFloat(parseFloat(account.annualValue / monthsNumber).toFixed(2))
+          costs[month.value] = parseFloat(parseFloat(account.annual_value / monthsNumber).toFixed(2))
         })
 
         distributions.push({
@@ -248,10 +210,12 @@ export default {
     CafeteriaRepository.getCafeteria()
       .then(response => {
           self.calculateFromMonth = self.months[response.data[0].start_month - 1]
-          response.data.forEach(account => {
-            const index = self.accounts.findIndex(tmpAccount => tmpAccount.name === account.name)
-            self.accounts[index].annualValue = String(account.annual_value)
-          })
+          self.accounts = response.data
+
+          // TODO if the backend send the visible account name too, this lines are unnecessary
+          self.accounts.forEach(function(account, index, accounts) {
+            accounts[index].value = self.getVisibleName(account.name)
+          });
         }
       )
       .finally(() => {

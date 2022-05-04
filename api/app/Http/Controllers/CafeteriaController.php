@@ -26,7 +26,7 @@ class CafeteriaController extends Controller
         collect($req->accounts)->map(function ($account) use ($startMonth) {
             Account::updateOrCreate(
                     ['name' => $account['name']],
-                    ['start_month' => $startMonth, 'annual_value' => $account['annualValue']]
+                    ['start_month' => $startMonth, 'annual_value' => $account['annual_value']]
                 );
         });
 
