@@ -113,7 +113,7 @@ export default {
       calculateFromMonth: null,
       valid: true,
       annualAccountRules: [
-        v => (!!v || v === 0) || "A mező kitöltése kötelező",
+        v => !!v || "A mező kitöltése kötelező",
         v => (v && v >= 0) || "Nem adhat meg negatív értéket",
         v => (v && v <= 200000) || "Nem lehet több mint 200 000",
       ],
@@ -192,7 +192,7 @@ export default {
         distributions.push({
           ...costs,
           ...{
-            account: account.value,
+            account: this.getVisibleName(account.name)
           },
         })
 
@@ -211,11 +211,6 @@ export default {
       .then(response => {
           self.calculateFromMonth = self.months[response.data[0].start_month - 1]
           self.accounts = response.data
-
-          // TODO if the backend send the visible account name too, this lines are unnecessary
-          self.accounts.forEach(function(account, index, accounts) {
-            accounts[index].value = self.getVisibleName(account.name)
-          });
         }
       )
       .finally(() => {
